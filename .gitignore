@@ -1,0 +1,13 @@
+venv/
+.env
+__pycache__/
+*.pyc
+
+node_modules/
+.next/
+
+chroma_db/
+temp_repos/
+generated_docs/
+
+.DS_Store
