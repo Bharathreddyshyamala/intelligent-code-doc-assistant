@@ -10,4 +10,8 @@ chroma_db/
 temp_repos/
 generated_docs/
 
-.DS_Store
+.DS_Storecd
+
+# Runtime-ingested projects
+backend/temp_repos/*
+!backend/temp_repos/.gitkeep
