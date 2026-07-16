@@ -3,11 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
 
+from routes.ingestion_routes import router as ingestion_router
+
 app = FastAPI(
     title="Intelligent Code Documentation Assistant API",
     description="FastAPI backend for Local RAG and Agentic AI code documentation assistant",
     version="1.0.0"
 )
+
+app.include_router(ingestion_router)
 
 
 # CORS setup allows Streamlit frontend to call FastAPI backend

@@ -11,3 +11,6 @@ temp_repos/
 generated_docs/
 
 .DS_Store
+
+#added after week 1, for local vector store
+vector_store/
