@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+from routes.ingestion_routes import router as ingestion_router
+from routes.parser_routes import router as parser_router
 
 
 app = FastAPI(
@@ -24,6 +26,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(ingestion_router)
+app.include_router(parser_router)
+
 
 
 @app.get("/")
