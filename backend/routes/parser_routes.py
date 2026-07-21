@@ -8,7 +8,7 @@ from fastapi import (
 )
 from pydantic import BaseModel, Field
 
-#from services.ast_parser import parse_project
+from services.ast_parser import ast_parser
 from services.file_scanner import (
     get_ast_path,
     get_source_directory,
@@ -134,11 +134,9 @@ def parse_code(
         )
 
         # Direct dependency on Member 1.
-        parser_result = parse_project(
-            project_id=request.project_id,
-            source_directory=source_directory,
-            output_path=ast_output_path,
-        )
+        parser_result = ast_parser.parse_project(
+    request.project_id
+)
 
         parser_result = validate_parser_result(
             parser_result

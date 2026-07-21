@@ -35,10 +35,17 @@ if "file_count" not in st.session_state:
 if "source_type" not in st.session_state:
     st.session_state["source_type"] = None
 
+if "parsed_file_count" not in st.session_state:
+    st.session_state["parsed_file_count"] = 0
+
+if "parsing_error_count" not in st.session_state:
+    st.session_state["parsing_error_count"] = 0
+
 
 # ---------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------
+
 
 def get_response_json(
     response: requests.Response,
@@ -183,7 +190,7 @@ def ingest_github_project(
 
 
 def ingest_uploaded_zip(
-    uploaded_file,
+    uploaded_file: Any,
 ) -> requests.Response:
     """
     Call POST /ingest-upload using multipart form data.
@@ -233,7 +240,6 @@ if st.button("Check Backend Health"):
             st.success(
                 "FastAPI backend is running successfully."
             )
-
             st.json(response.json())
 
         else:
@@ -241,7 +247,6 @@ if st.button("Check Backend Health"):
                 "The backend responded, but the health "
                 "check was unsuccessful."
             )
-
             st.write(response.text)
 
     except requests.exceptions.ConnectionError:
@@ -285,9 +290,7 @@ if input_type == "Local Folder Path":
 
     local_path = st.text_input(
         "Enter local project folder path:",
-        placeholder=(
-            "/path/to/your/project-folder"
-        ),
+        placeholder="/path/to/your/project-folder",
     )
 
     st.caption(
@@ -396,9 +399,7 @@ elif input_type == "GitHub Repository URL":
                 )
 
             except requests.exceptions.ConnectionError:
-                st.error(
-                    "Could not connect to FastAPI."
-                )
+                st.error("Could not connect to FastAPI.")
 
             except requests.exceptions.Timeout:
                 st.error(
@@ -425,28 +426,18 @@ elif input_type == "Upload ZIP File":
     )
 
     if uploaded_file is not None:
-        file_size_mb = (
-            uploaded_file.size / (1024 * 1024)
-        )
+        file_size_mb = uploaded_file.size / (1024 * 1024)
 
         st.success("ZIP file selected.")
-
-        st.write(
-            f"File name: `{uploaded_file.name}`"
-        )
-
-        st.write(
-            f"File size: `{file_size_mb:.2f} MB`"
-        )
+        st.write(f"File name: `{uploaded_file.name}`")
+        st.write(f"File size: `{file_size_mb:.2f} MB`")
 
     if st.button(
         "Submit Uploaded Project",
         type="primary",
     ):
         if uploaded_file is None:
-            st.warning(
-                "Please select a ZIP file."
-            )
+            st.warning("Please select a ZIP file.")
 
         else:
             try:
@@ -463,9 +454,7 @@ elif input_type == "Upload ZIP File":
                 )
 
             except requests.exceptions.ConnectionError:
-                st.error(
-                    "Could not connect to FastAPI."
-                )
+                st.error("Could not connect to FastAPI.")
 
             except requests.exceptions.Timeout:
                 st.error(
@@ -473,9 +462,7 @@ elif input_type == "Upload ZIP File":
                 )
 
             except requests.RequestException as error:
-                st.error(
-                    f"Upload ingestion failed: {error}"
-                )
+                st.error(f"Upload ingestion failed: {error}")
 
 
 st.divider()
@@ -493,7 +480,6 @@ if st.session_state["project_id"]:
     )
 
     st.write("Project ID")
-
     st.code(
         st.session_state["project_id"],
         language=None,
@@ -535,8 +521,8 @@ st.divider()
 st.header("Parse Project")
 
 st.caption(
-    "This section will work after Member 1 implements "
-    "parse_project() inside services/ast_parser.py."
+    "Parse all Python files in the current project's "
+    "source directory and generate ast.json."
 )
 
 if st.session_state["project_id"]:
@@ -548,9 +534,9 @@ if st.session_state["project_id"]:
                 response = requests.post(
                     f"{FASTAPI_BASE_URL}/parse-code",
                     json={
-                        "project_id": (
-                            st.session_state["project_id"]
-                        )
+                        "project_id": st.session_state[
+                            "project_id"
+                        ]
                     },
                     timeout=300,
                 )
@@ -562,11 +548,40 @@ if st.session_state["project_id"]:
                     result.get("status", "parsed")
                 )
 
-                st.success(
-                    "Project parsed successfully."
+                st.session_state["parsed_file_count"] = (
+                    result.get("file_count", 0)
                 )
 
-                st.json(result)
+                st.session_state["parsing_error_count"] = (
+                    result.get("error_count", 0)
+                )
+
+                st.success("Project parsed successfully.")
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.metric(
+                        "Parsing status",
+                        result.get("status", "parsed"),
+                    )
+
+                with col2:
+                    st.metric(
+                        "Python files parsed",
+                        result.get("file_count", 0),
+                    )
+
+                with col3:
+                    st.metric(
+                        "Parsing errors",
+                        result.get("error_count", 0),
+                    )
+
+                with st.expander(
+                    "View parse API response"
+                ):
+                    st.json(result)
 
             else:
                 st.error(
@@ -577,19 +592,13 @@ if st.session_state["project_id"]:
                 )
 
         except requests.exceptions.ConnectionError:
-            st.error(
-                "Could not connect to FastAPI."
-            )
+            st.error("Could not connect to FastAPI.")
 
         except requests.exceptions.Timeout:
-            st.error(
-                "The parsing request timed out."
-            )
+            st.error("The parsing request timed out.")
 
         except requests.RequestException as error:
-            st.error(
-                f"Parsing request failed: {error}"
-            )
+            st.error(f"Parsing request failed: {error}")
 
 else:
     st.button(
@@ -605,7 +614,6 @@ st.divider()
 # ---------------------------------------------------------
 # Future features
 # ---------------------------------------------------------
-
 st.header("Future Modes")
 
 col1, col2, col3 = st.columns(3)
