@@ -1,17 +1,41 @@
-.venv/
-.env
+# macOS
+.DS_Store
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
 
-node_modules/
-.next/
+# Virtual environments
+venv/
+.venv/
+backend/venv/
 
-chroma_db/
-temp_repos/
-generated_docs/
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
 
-.DS_Storecd
+# ChromaDB local database
+backend/vector_store/chroma_db/
+backend/vector_store/exports/
 
-# Runtime-ingested projects
-backend/temp_repos/*
-!backend/temp_repos/.gitkeep
+# Temporary ingested projects
+backend/temp_repos/
+
+# Generated documentation
+backend/generated_docs/
+
+# Test/cache files
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# IDE files
+.vscode/
+.idea/
