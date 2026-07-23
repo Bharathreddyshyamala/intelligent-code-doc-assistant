@@ -1,29 +1,41 @@
-# Python environments
-.venv/
-venv/
-env/
+# macOS
+.DS_Store
 
-# Environment variables
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+backend/venv/
+
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
 
-# Python cache
-__pycache__/
-*.pyc
+# ChromaDB local database
+backend/vector_store/chroma_db/
+backend/vector_store/exports/
 
-# Frontend
-node_modules/
-.next/
+# Temporary ingested projects
+backend/temp_repos/
 
-# Generated/runtime data
-chroma_db/
-temp_repos/
-generated_docs/
+# Generated documentation
+backend/generated_docs/
 
-# macOS
-.DS_Store
+# Test/cache files
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
-# Runtime-ingested projects
-backend/temp_repos/*
-!backend/temp_repos/.gitkeep
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# IDE files
+.vscode/
+.idea/

@@ -3,6 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 from routes.ingestion_routes import router as ingestion_router
 from routes.parser_routes import router as parser_router
+from routes.indexing_routes import (
+    router as indexing_router,
+)
+from routes.rag_routes import (
+    router as rag_router,
+)
 
 
 app = FastAPI(
@@ -28,7 +34,8 @@ app.add_middleware(
 )
 app.include_router(ingestion_router)
 app.include_router(parser_router)
-
+app.include_router(indexing_router)
+app.include_router( rag_router)
 
 
 @app.get("/")
