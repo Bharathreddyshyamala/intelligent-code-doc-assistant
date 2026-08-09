@@ -742,7 +742,7 @@ Recommended:
 Clone the repository:
 
 ```bash
-git clone <your-repository-url>
+git clone (https://github.com/Bharathreddyshyamala/intelligent-code-doc-assistant)
 cd intelligent-code-doc-assistant
 ```
 
