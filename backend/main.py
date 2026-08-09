@@ -9,6 +9,9 @@ from routes.indexing_routes import (
 from routes.rag_routes import (
     router as rag_router,
 )
+from routes.docs_routes import (
+    router as docs_router,
+)
 
 
 app = FastAPI(
@@ -36,6 +39,10 @@ app.include_router(ingestion_router)
 app.include_router(parser_router)
 app.include_router(indexing_router)
 app.include_router( rag_router)
+app.include_router(
+    docs_router,
+    prefix="/api/v1",
+)
 
 
 @app.get("/")

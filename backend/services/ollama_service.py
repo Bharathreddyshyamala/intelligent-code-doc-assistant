@@ -8,9 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# ---------------------------------------------------------
-# Ollama configuration
-# ---------------------------------------------------------
+
 
 OLLAMA_BASE_URL = os.getenv(
     "OLLAMA_BASE_URL",
@@ -35,9 +33,6 @@ OLLAMA_CHAT_TEMPERATURE = float(
 )
 
 
-# ---------------------------------------------------------
-# Exceptions
-# ---------------------------------------------------------
 
 
 class OllamaServiceError(RuntimeError):
@@ -46,9 +41,7 @@ class OllamaServiceError(RuntimeError):
     """
 
 
-# ---------------------------------------------------------
-# Ollama client
-# ---------------------------------------------------------
+
 
 
 def get_ollama_client() -> ollama.Client:
@@ -61,9 +54,7 @@ def get_ollama_client() -> ollama.Client:
     )
 
 
-# ---------------------------------------------------------
-# Embedding helpers
-# ---------------------------------------------------------
+
 
 
 def extract_embeddings(
@@ -149,9 +140,7 @@ def generate_embeddings(
     return embeddings
 
 
-# ---------------------------------------------------------
-# Chat response helpers
-# ---------------------------------------------------------
+
 
 
 def extract_chat_content(

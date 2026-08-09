@@ -16,8 +16,6 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 # backend/temp_repos/
 TEMP_REPOS_DIR = BACKEND_DIR / "temp_repos"
 
-# The current sprint uses a Python AST parser.
-# Add more extensions later when parsers for other languages are implemented.
 SUPPORTED_EXTENSIONS = {
     ".py",
 }
@@ -50,9 +48,7 @@ VALID_SOURCE_TYPES = {
 
 PROJECT_ID_PATTERN = re.compile(r"^[a-f0-9]{32}$")
 
-# Optional security restriction.
-# Example:
-# export LOCAL_PROJECTS_ROOT=/Users/bharath/projects
+
 LOCAL_PROJECTS_ROOT_VALUE = os.getenv("LOCAL_PROJECTS_ROOT")
 LOCAL_PROJECTS_ROOT = (
     Path(LOCAL_PROJECTS_ROOT_VALUE).expanduser().resolve()
@@ -261,8 +257,7 @@ def copy_supported_code_files(
         if not source_file.is_file():
             continue
 
-        # Symbolic links are skipped to avoid reading files
-        # outside the selected project.
+        
         if source_file.is_symlink():
             continue
 

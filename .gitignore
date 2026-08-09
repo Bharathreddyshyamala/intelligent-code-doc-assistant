@@ -39,3 +39,5 @@ htmlcov/
 # IDE files
 .vscode/
 .idea/
+
+backend/generated_docs/

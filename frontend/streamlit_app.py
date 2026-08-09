@@ -1,18 +1,25 @@
 import os
+from pathlib import Path
 from typing import Any, Dict
 from ask_code_ui import (
     render_ask_code_section,
+)
+from generate_docs_ui import (
+    render_generate_docs_ui,
 )
 
 import requests
 import streamlit as st
 
 
-# FastAPI backend URL
-FASTAPI_BASE_URL = os.getenv(
+
+FASTAPI_ROOT_URL = os.getenv(
     "FASTAPI_BASE_URL",
     "http://127.0.0.1:8000",
-)
+).rstrip("/")
+
+# Generate Docs is registered under the versioned API prefix.
+FASTAPI_V1_URL = f"{FASTAPI_ROOT_URL}/api/v1"
 
 
 st.set_page_config(
@@ -22,12 +29,15 @@ st.set_page_config(
 )
 
 
-# ---------------------------------------------------------
+
 # Session state
-# ---------------------------------------------------------
+
 
 if "project_id" not in st.session_state:
     st.session_state["project_id"] = None
+
+if "project_name" not in st.session_state:
+    st.session_state["project_name"] = None
 
 if "project_status" not in st.session_state:
     st.session_state["project_status"] = None
@@ -66,9 +76,7 @@ if "collection_name" not in st.session_state:
     st.session_state["collection_name"] = None
 
 
-# ---------------------------------------------------------
-# Helper functions
-# ---------------------------------------------------------
+
 
 
 def get_response_json(
@@ -103,9 +111,62 @@ def reset_processing_state() -> None:
     st.session_state["ask_code_history"] = []
 
 
+
+def format_project_name(
+    project_name: str,
+) -> str:
+    """
+    Convert a folder, repository, or ZIP name into a readable title.
+
+    Examples:
+        calculator -> Calculator
+        library-management -> Library Management
+        code_doc_assistant -> Code Doc Assistant
+    """
+
+    cleaned_name = (
+        project_name
+        .strip()
+        .replace("-", " ")
+        .replace("_", " ")
+    )
+
+    cleaned_name = " ".join(
+        cleaned_name.split()
+    )
+
+    if not cleaned_name:
+        return "Untitled Project"
+
+    return cleaned_name.title()
+
+
+def get_github_project_name(
+    repository_url: str,
+) -> str:
+    """
+    Extract the repository name from a GitHub URL.
+    """
+
+    cleaned_url = (
+        repository_url
+        .strip()
+        .split("?", 1)[0]
+        .split("#", 1)[0]
+        .rstrip("/")
+    )
+
+    repository_name = cleaned_url.rsplit("/", 1)[-1]
+
+    if repository_name.lower().endswith(".git"):
+        repository_name = repository_name[:-4]
+
+    return repository_name or "GitHub Project"
+
 def save_project_result(
     result: Dict[str, Any],
     source_type: str,
+    project_name: str,
 ) -> None:
     """
     Save the project details returned by FastAPI.
@@ -120,6 +181,18 @@ def save_project_result(
 
     st.session_state["project_id"] = result.get(
         "project_id"
+    )
+
+    detected_project_name = (
+        project_name
+        or result.get("project_name")
+        or result.get("repository_name")
+        or result.get("name")
+        or ""
+    )
+
+    st.session_state["project_name"] = format_project_name(
+        detected_project_name
     )
 
     st.session_state["file_count"] = result.get(
@@ -140,6 +213,7 @@ def save_project_result(
 def display_ingestion_response(
     response: requests.Response,
     source_type: str,
+    project_name: str,
 ) -> None:
     """
     Display success or error information returned by FastAPI.
@@ -151,25 +225,32 @@ def display_ingestion_response(
         save_project_result(
             result=result,
             source_type=source_type,
+            project_name=project_name,
         )
 
         st.success("Project ingested successfully.")
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
+            st.metric(
+                "Project",
+                st.session_state["project_name"],
+            )
+
+        with col2:
             st.metric(
                 "Status",
                 result.get("status", "unknown"),
             )
 
-        with col2:
+        with col3:
             st.metric(
                 "Files found",
                 result.get("file_count", 0),
             )
 
-        with col3:
+        with col4:
             st.metric(
                 "Source type",
                 source_type,
@@ -202,7 +283,7 @@ def ingest_local_project(
     """
 
     return requests.post(
-        f"{FASTAPI_BASE_URL}/ingest-local",
+        f"{FASTAPI_ROOT_URL}/ingest-local",
         json={
             "path": local_path,
         },
@@ -226,7 +307,7 @@ def ingest_github_project(
         request_body["branch"] = branch
 
     return requests.post(
-        f"{FASTAPI_BASE_URL}/ingest-github",
+        f"{FASTAPI_ROOT_URL}/ingest-github",
         json=request_body,
         timeout=300,
     )
@@ -248,7 +329,7 @@ def ingest_uploaded_zip(
     }
 
     return requests.post(
-        f"{FASTAPI_BASE_URL}/ingest-upload",
+        f"{FASTAPI_ROOT_URL}/ingest-upload",
         files=files,
         timeout=300,
     )
@@ -262,7 +343,7 @@ def parse_current_project(
     """
 
     return requests.post(
-        f"{FASTAPI_BASE_URL}/parse-code",
+        f"{FASTAPI_ROOT_URL}/parse-code",
         json={
             "project_id": project_id,
         },
@@ -283,7 +364,7 @@ def index_current_project(
     """
 
     return requests.post(
-        f"{FASTAPI_BASE_URL}/index-code",
+        f"{FASTAPI_ROOT_URL}/index-code",
         json={
             "project_id": project_id,
         },
@@ -291,9 +372,7 @@ def index_current_project(
     )
 
 
-# ---------------------------------------------------------
-# Page title
-# ---------------------------------------------------------
+
 
 st.title("Intelligent Code Documentation Assistant")
 
@@ -303,16 +382,14 @@ st.write(
 )
 
 
-# ---------------------------------------------------------
-# Backend health check
-# ---------------------------------------------------------
+
 
 st.header("Backend Connection")
 
 if st.button("Check Backend Health"):
     try:
         response = requests.get(
-            f"{FASTAPI_BASE_URL}/health",
+            f"{FASTAPI_ROOT_URL}/health",
             timeout=5,
         )
 
@@ -345,9 +422,9 @@ if st.button("Check Backend Health"):
 st.divider()
 
 
-# ---------------------------------------------------------
+
 # Source-code input
-# ---------------------------------------------------------
+
 
 st.header("Source Code Input")
 
@@ -361,9 +438,9 @@ input_type = st.radio(
 )
 
 
-# ---------------------------------------------------------
+
 # Option 1: Local folder
-# ---------------------------------------------------------
+
 
 if input_type == "Local Folder Path":
     st.subheader("Local Folder Path")
@@ -398,9 +475,14 @@ if input_type == "Local Folder Path":
                         local_path=cleaned_path,
                     )
 
+                local_project_name = Path(
+                    cleaned_path
+                ).expanduser().name
+
                 display_ingestion_response(
                     response=response,
                     source_type="local",
+                    project_name=local_project_name,
                 )
 
             except requests.exceptions.ConnectionError:
@@ -421,9 +503,9 @@ if input_type == "Local Folder Path":
                 )
 
 
-# ---------------------------------------------------------
+
 # Option 2: GitHub repository
-# ---------------------------------------------------------
+
 
 elif input_type == "GitHub Repository URL":
     st.subheader("GitHub Repository URL")
@@ -473,9 +555,16 @@ elif input_type == "GitHub Repository URL":
                         branch=cleaned_branch,
                     )
 
+                github_project_name = (
+                    get_github_project_name(
+                        cleaned_url
+                    )
+                )
+
                 display_ingestion_response(
                     response=response,
                     source_type="github",
+                    project_name=github_project_name,
                 )
 
             except requests.exceptions.ConnectionError:
@@ -492,9 +581,9 @@ elif input_type == "GitHub Repository URL":
                 )
 
 
-# ---------------------------------------------------------
+
 # Option 3: ZIP upload
-# ---------------------------------------------------------
+
 
 elif input_type == "Upload ZIP File":
     st.subheader("Upload Project ZIP")
@@ -528,9 +617,14 @@ elif input_type == "Upload ZIP File":
                         uploaded_file=uploaded_file,
                     )
 
+                uploaded_project_name = Path(
+                    uploaded_file.name
+                ).stem
+
                 display_ingestion_response(
                     response=response,
                     source_type="upload",
+                    project_name=uploaded_project_name,
                 )
 
             except requests.exceptions.ConnectionError:
@@ -557,6 +651,15 @@ st.header("Current Project")
 if st.session_state["project_id"]:
     st.success(
         "A project is available for parsing and indexing."
+    )
+
+    st.write("Project name")
+    st.code(
+        st.session_state.get(
+            "project_name",
+            "",
+        ),
+        language=None,
     )
 
     st.write("Project ID")
@@ -634,9 +737,9 @@ else:
 st.divider()
 
 
-# ---------------------------------------------------------
+
 # Parse project
-# ---------------------------------------------------------
+
 
 st.header("Parse Project")
 
@@ -742,9 +845,9 @@ else:
 st.divider()
 
 
-# ---------------------------------------------------------
+
 # Index project
-# ---------------------------------------------------------
+
 
 st.header("Index Project")
 
@@ -947,34 +1050,21 @@ st.divider()
 
 
 
-# ---------------------------------------------------------
+
 # Ask Code
-# ---------------------------------------------------------
+
 
 render_ask_code_section(
-    FASTAPI_BASE_URL
+    FASTAPI_ROOT_URL
 )
 
 
 st.divider()
-# ---------------------------------------------------------
-# Future features
-# ---------------------------------------------------------
 
-st.header("Future Modes")
 
-col1, col2 = st.columns(2)
+# Document generation 
 
-with col1:
-    if st.button("Explain Code"):
-        st.info(
-            "Explain Code mode will be connected "
-            "in a later sprint."
-        )
 
-with col2:
-    if st.button("Generate Docs"):
-        st.info(
-            "Generate Docs mode will be connected "
-            "in a later sprint."
-        )
+render_generate_docs_ui(
+    fastapi_base_url=FASTAPI_V1_URL,
+)
