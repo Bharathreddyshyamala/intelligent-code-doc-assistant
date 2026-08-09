@@ -13,10 +13,6 @@ from .ollama_service import (
 load_dotenv()
 
 
-# ---------------------------------------------------------
-# Embedding configuration
-# ---------------------------------------------------------
-
 EMBEDDING_BATCH_SIZE = int(
     os.getenv(
         "EMBEDDING_BATCH_SIZE",
@@ -25,20 +21,12 @@ EMBEDDING_BATCH_SIZE = int(
 )
 
 
-# ---------------------------------------------------------
-# Exceptions
-# ---------------------------------------------------------
-
 
 class EmbeddingServiceError(RuntimeError):
     """
     Raised when document or query embedding fails.
     """
 
-
-# ---------------------------------------------------------
-# Document embeddings
-# ---------------------------------------------------------
 
 
 def embed_documents(
@@ -127,10 +115,6 @@ def embed_documents(
 
     return all_embeddings
 
-
-# ---------------------------------------------------------
-# Query embedding
-# ---------------------------------------------------------
 
 
 def embed_query(

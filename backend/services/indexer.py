@@ -26,9 +26,6 @@ from .ollama_service import (
 load_dotenv()
 
 
-# ---------------------------------------------------------
-# ChromaDB configuration
-# ---------------------------------------------------------
 
 BACKEND_DIRECTORY = Path(__file__).resolve().parents[1]
 
