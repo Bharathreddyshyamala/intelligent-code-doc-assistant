@@ -29,8 +29,6 @@ The application is designed to run locally so source code, embeddings, vector st
 - [Troubleshooting](#troubleshooting)
 - [Current Limitations](#current-limitations)
 - [Future Enhancements](#future-enhancements)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
