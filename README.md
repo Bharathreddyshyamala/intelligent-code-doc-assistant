@@ -283,42 +283,6 @@ http://127.0.0.1:8000/docs
 ## System Architecture
 
 ```text
-+--------------------------------------------------------+
-|                  Streamlit Frontend                    |
-|                                                        |
-| Ingest | Parse | Index | Ask Code | Generate PDF Docs |
-+------------------------------+-------------------------+
-                               |
-                               | HTTP
-                               v
-+--------------------------------------------------------+
-|                     FastAPI Backend                    |
-|                                                        |
-|                       API Routes                       |
-+------------------------------+-------------------------+
-                               |
-                               v
-+--------------------------------------------------------+
-|                  Application Services                  |
-|                                                        |
-| file_scanner.py                                        |
-| ast_parser.py                                          |
-| chunker.py                                             |
-| embedding_service.py                                   |
-| indexer.py                                             |
-| retrieval_service.py                                   |
-| reranker_service.py                                    |
-| ollama_service.py                                      |
-| rag_service.py                                         |
-| doc_generator.py                                       |
-+--------------------+------------------+----------------+
-                     |                  |
-                     v                  v
-              +-------------+     +-------------+
-              |  ChromaDB   |     |   Ollama    |
-              | Vector DB   |     | Local Models|
-              +-------------+     +-------------+
-```
 
 ### Routes vs Services
 
