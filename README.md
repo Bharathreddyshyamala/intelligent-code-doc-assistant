@@ -429,8 +429,8 @@ Indexing is required for **Ask Code**, but the current documentation flow can ru
 | Frontend | Streamlit |
 | Static Analysis | Python AST |
 | Local LLM Runtime | Ollama |
-| Generation Model | `qwen2.5-coder` or configured Ollama model |
-| Embedding Model | `embeddinggemma` or configured Ollama embedding model |
+| Generation Model | `qwen2.5-coder`  |
+| Embedding Model | `embeddinggemma`  |
 | Vector Database | ChromaDB |
 | API Server | Uvicorn |
 | PDF Generation | ReportLab |
@@ -438,62 +438,7 @@ Indexing is required for **Ask Code**, but the current documentation flow can ru
 | Data Storage | JSON + local filesystem + ChromaDB |
 | Version Control | Git / GitHub |
 
----
 
-## Project Structure
-
-A representative repository structure is:
-
-```text
-intelligent-code-doc-assistant/
-|
-+-- backend/
-|   |
-|   +-- main.py
-|   +-- requirements.txt
-|   +-- .env
-|   +-- .env.example
-|   |
-|   +-- routes/
-|   |   +-- ingestion_routes.py
-|   |   +-- parser_routes.py
-|   |   +-- indexing_routes.py
-|   |   +-- rag_routes.py
-|   |   +-- docs_routes.py
-|   |   +-- evaluation_routes.py
-|   |
-|   +-- services/
-|   |   +-- github_ingestion.py
-|   |   +-- file_scanner.py
-|   |   +-- ast_parser.py
-|   |   +-- chunker.py
-|   |   +-- embedding_service.py
-|   |   +-- indexer.py
-|   |   +-- retrieval_service.py
-|   |   +-- reranker_service.py
-|   |   +-- ollama_service.py
-|   |   +-- rag_service.py
-|   |   +-- doc_generator.py
-|   |   +-- langgraph_agent.py
-|   |   +-- ragas_evaluator.py
-|   |
-|   +-- vector_store/
-|   +-- temp_repos/
-|   +-- generated_docs/
-|   +-- uploads/
-|
-+-- frontend/
-|   +-- streamlit_app.py
-|   +-- ask_code_ui.py
-|   +-- generate_docs_ui.py
-|
-+-- README.md
-+-- .gitignore
-```
-
-Some modules shown above can be optional or future-facing depending on the current development branch.
-
----
 
 ## Core Components
 
